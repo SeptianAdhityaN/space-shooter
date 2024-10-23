@@ -47,55 +47,55 @@ def draw_bg():
 
 # Class Player
 class Player(pg.sprite.Sprite):
-  def __init__(self):
-    super().__init__()
-    self.image = pg.image.load(".\\assets\\images\\player.png").convert_alpha()
-    self.image = pg.transform.scale(self.image, (75, 75))
-    self.rect = self.image.get_rect()
-    self.rect.center = (SCREEN_WIDTH//2, SCREEN_HEIGHT - 50)
-    self.speed = 5
-  
-  def update(self):
-    keys = pg.key.get_pressed()
-    if keys[pg.K_a] and self.rect.left > 0:
-      self.rect.x -= self.speed
-    if keys[pg.K_d] and self.rect.right < SCREEN_WIDTH:
-      self.rect.x += self.speed
-    if keys[pg.K_w] and self.rect.top > 0:
-      self.rect.y -= self.speed
-    if keys[pg.K_s] and self.rect.bottom < SCREEN_HEIGHT:
-      self.rect.y += self.speed
+    def __init__(self):
+        super().__init__()
+        self.image = pg.image.load(".\\assets\\images\\player.png").convert_alpha()
+        self.image = pg.transform.scale(self.image, (75, 75))
+        self.rect = self.image.get_rect()
+        self.rect.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT - 50)
+        self.speed = 5
 
-    # Joystick movement
-    if pg.joystick.get_count() > 0:
-        x_axis = joystick.get_axis(0)  # Horizontal movement (left stick)
-        y_axis = joystick.get_axis(1)  # Vertical movement (left stick)
-        self.rect.x += int(x_axis * self.speed)
-        self.rect.y += int(y_axis * self.speed)
-        
-    # Batasi agar tidak keluar dari jendela
-    if self.rect.left < 0:
-        self.rect.left = 0
-    if self.rect.right > SCREEN_WIDTH:
-        self.rect.right = SCREEN_WIDTH
-    if self.rect.top < 0:
-        self.rect.top = 0
-    if self.rect.bottom > SCREEN_HEIGHT:
-        self.rect.bottom = SCREEN_HEIGHT
+    def update(self):
+        keys = pg.key.get_pressed()
+        if keys[pg.K_a] and self.rect.left > 0:
+            self.rect.x -= self.speed
+        if keys[pg.K_d] and self.rect.right < SCREEN_WIDTH:
+            self.rect.x += self.speed
+        if keys[pg.K_w] and self.rect.top > 0:
+            self.rect.y -= self.speed
+        if keys[pg.K_s] and self.rect.bottom < SCREEN_HEIGHT:
+            self.rect.y += self.speed
+
+        # Joystick movement
+        if pg.joystick.get_count() > 0:
+            x_axis = joystick.get_axis(0)
+            y_axis = joystick.get_axis(1)
+            self.rect.x += int(x_axis * self.speed)
+            self.rect.y += int(y_axis * self.speed)
+
+        # Batasi agar tidak keluar dari jendela
+        if self.rect.left < 0:
+            self.rect.left = 0
+        if self.rect.right > SCREEN_WIDTH:
+            self.rect.right = SCREEN_WIDTH
+        if self.rect.top < 0:
+            self.rect.top = 0
+        if self.rect.bottom > SCREEN_HEIGHT:
+            self.rect.bottom = SCREEN_HEIGHT
 
 # Class Bullet
 class Bullet(pg.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
         self.image = pg.image.load(".\\assets\\images\\bullet.png").convert_alpha()
-        self.image =pg.transform.scale(self.image, (50, 50))
+        self.image = pg.transform.scale(self.image, (50, 50))
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
-        self.speed = -10  # Peluru bergerak ke atas
+        self.speed = -10
 
     def update(self):
         self.rect.y += self.speed
-        if self.rect.bottom < 0:  # Hapus peluru jika keluar dari layar
+        if self.rect.bottom < 0:
             self.kill()
 
 # Class Enemy
@@ -108,7 +108,7 @@ class Enemy(pg.sprite.Sprite):
         self.rect.x = rand.randint(0, SCREEN_WIDTH - 75)
         self.rect.y = rand.randint(-100, -50)
         self.speed = rand.randint(1, 5)
-        self.health = 5  # Menambahkan nyawa untuk musuh
+        self.health = 5
 
     def update(self):
         self.rect.y += self.speed
@@ -118,19 +118,47 @@ class Enemy(pg.sprite.Sprite):
             self.speed = rand.randint(1, 5)
 
     def draw_health(self):
-        # Menghitung panjang bar kesehatan berdasarkan nyawa
         health_bar_length = 50
-        health_ratio = self.health / 5  # 3 adalah nyawa maksimum
+        health_ratio = self.health / 5
         health_bar_length_current = health_bar_length * health_ratio
 
-        # Posisi bar kesehatan
         health_bar = pg.Rect(self.rect.centerx - health_bar_length // 2, self.rect.bottom + 5, health_bar_length, 5)
         health_bar_current = pg.Rect(self.rect.centerx - health_bar_length // 2, self.rect.bottom + 5, health_bar_length_current, 5)
 
-        # Menggambar bar kesehatan
-        pg.draw.rect(screen, RED, health_bar)  # Border
+        pg.draw.rect(screen, RED, health_bar)
         if self.health > 0:
-            pg.draw.rect(screen, GREEN, health_bar_current)  # Bar kesehatan yang terisi
+            pg.draw.rect(screen, GREEN, health_bar_current)
+
+# Class Boss
+class Boss(pg.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+        self.image = pg.image.load(".\\assets\\images\\boss.png").convert_alpha()
+        self.image = pg.transform.scale(self.image, (200, 200))
+        self.rect = self.image.get_rect()
+        self.rect.x = rand.randint(0, SCREEN_WIDTH - 200)
+        self.rect.y = rand.randint(-200, -100)
+        self.speed = rand.randint(2, 4)
+        self.health = 30
+
+    def update(self):
+        self.rect.y += self.speed
+        if self.rect.top > SCREEN_HEIGHT:
+            self.rect.x = rand.randint(0, SCREEN_WIDTH - 200)
+            self.rect.y = rand.randint(-200, -100)
+            self.speed = rand.randint(2, 4)
+
+    def draw_health(self):
+        health_bar_length = 150
+        health_ratio = self.health / 30
+        health_bar_length_current = health_bar_length * health_ratio
+
+        health_bar = pg.Rect(self.rect.centerx - health_bar_length // 2, self.rect.bottom + 10, health_bar_length, 10)
+        health_bar_current = pg.Rect(self.rect.centerx - health_bar_length // 2, self.rect.bottom + 10, health_bar_length_current, 10)
+
+        pg.draw.rect(screen, RED, health_bar)
+        if self.health > 0:
+            pg.draw.rect(screen, GREEN, health_bar_current)
 
 def draw_text(text, font, color, x, y):
     screen_text = font.render(text, True, color)
@@ -152,27 +180,23 @@ def draw_button(text, x, y, w, h, inactive_color, active_color, action=None):
 
 def start_game():
     global highest_score
-    # Inisialisasi sprite group
     all_sprites = pg.sprite.Group()
     enemies = pg.sprite.Group()
-    bullets = pg.sprite.Group()  # Group untuk peluru
+    bullets = pg.sprite.Group()
+    bosses = pg.sprite.Group()
 
-    # Membuat Player
     player = Player()
     all_sprites.add(player)
 
-    # Membuat Enemies
     for i in range(5):
         enemy = Enemy()
         all_sprites.add(enemy)
         enemies.add(enemy)
 
-    # Membuat Skor dan level
     score = 0
     start = pg.time.get_ticks()
     level = 1
 
-    # Loop Game
     running = True
     game_over = False 
     while running:
@@ -181,111 +205,103 @@ def start_game():
             if event.type == pg.QUIT:
                 running = False
             
-            # Menembakkan peluru dengan mouse atau joystick
-            if event.type == pg.MOUSEBUTTONDOWN and event.button == 1:  # Mouse kiri
+            if event.type == pg.MOUSEBUTTONDOWN and event.button == 1:
                 hit_sound.play()
                 bullet = Bullet(player.rect.centerx, player.rect.top)
                 all_sprites.add(bullet)
                 bullets.add(bullet)
             if pg.joystick.get_count() > 0:
-                if joystick.get_button(2):  # Misalkan tombol  di joystick
+                if event.type == pg.JOYBUTTONDOWN and event.button == 2:
                     hit_sound.play()
                     bullet = Bullet(player.rect.centerx, player.rect.top)
                     all_sprites.add(bullet)
                     bullets.add(bullet)
 
-            # Restart game dengan joystick
-            if pg.joystick.get_count() > 0:
-                if joystick.get_button(0) and game_over:
-                    start_game()
+        # Update
+        all_sprites.update()
 
-                if joystick.get_button(1) and game_over:
-                    running = False
-        
-        # Logika naik level
-        if score > level * 10:
+        # Collision antara peluru dan musuh
+        hits = pg.sprite.groupcollide(enemies, bullets, False, True)
+        for hit in hits:
+            hit.health -= 1
+            if hit.health <= 0:
+                hit.kill()
+                score += 5
+                kill_sound.play()
+                new_enemy = Enemy()
+                all_sprites.add(new_enemy)
+                enemies.add(new_enemy)
+
+        # Collision antara peluru dan boss
+        boss_hits = pg.sprite.groupcollide(bosses, bullets, False, True)
+        for hit in boss_hits:
+            hit.health -= 1
+            if hit.health <= 0:
+                hit.kill()
+                score += 25
+                kill_sound.play()
+
+        # Boss muncul setiap skor 100
+        if score >= level * 100:
             level += 1
-            for i in range(5):
-                enemy = Enemy()
-                enemy.speed = rand.randint(5, 10)
-                all_sprites.add(enemy)
-                enemies.add(enemy)
+            boss = Boss()
+            all_sprites.add(boss)
+            bosses.add(boss)
 
-        # Logic Game Over
-        if not game_over:
-            all_sprites.update()
+        # Memperbarui Highest Score
+        if score > highest_score:
+            highest_score = score
 
-            # Cek tabrakan antara peluru dan musuh
-            hits = pg.sprite.groupcollide(enemies, bullets, False, True)
-            for enemy in hits:
-                enemy.health -= 1  # Mengurangi nyawa musuh
-                if enemy.health <= 0:
-                    enemy.kill()  # Menghapus musuh jika nyawanya habis
-                    kill_sound.play()
+        # Deteksi tabrakan antara pemain dan musuh/boss
+        if pg.sprite.spritecollideany(player, enemies) or pg.sprite.spritecollideany(player, bosses):
+            game_over_sound.play()
+            draw_bg()
+            draw_text("GAME OVER", pg.font.SysFont(None, 100), RED, SCREEN_WIDTH // 4 + 125, SCREEN_HEIGHT // 3)
+            pg.display.flip()
+            pg.time.wait(2000)  # Tunggu 2 detik sebelum keluar
+            running = False  # Mengakhiri game
 
-            # Cek Player hit Enemy
-            hits = pg.sprite.spritecollide(player, enemies, False)
-            if hits:
-                game_over = True
-                game_over_time = (pg.time.get_ticks() - start) // 1000
-
-                # Logika Highest Score
-                if game_over_time > highest_score:
-                    highest_score = game_over_time
-
-                game_over_sound.play()
-
-            # Menghitung Skor
-            score = (pg.time.get_ticks() - start) // 1000
-
+        # Menggambar ulang layar
         draw_bg()
-
         all_sprites.draw(screen)
 
-        # Gambar nyawa musuh
+        # Gambar Health untuk musuh dan boss
         for enemy in enemies:
             enemy.draw_health()
 
-        font = pg.font.SysFont(None, 30)
-        text = font.render(f"Score: {score}", True, WHITE)
-        screen.blit(text, (10, 10))
+        for boss in bosses:
+            boss.draw_health()
 
-        font = pg.font.SysFont(None, 30)
-        text = font.render(f"Level: {level}", True, WHITE)
-        screen.blit(text, (10, 10+20))
-
-        if game_over:
-            over_text = font.render(f"Game Over! Your Highest Score: {highest_score}", True, WHITE)
-            screen.blit(over_text, (SCREEN_WIDTH // 2 - 150, SCREEN_HEIGHT // 2))
-
-            # Tombol Restart
-            draw_button("Restart Game", SCREEN_WIDTH // 2 - 165, SCREEN_HEIGHT // 2 + 75, 350, 50, BLUE, RED, start_game)
+        draw_text(f"Score: {score}", pg.font.SysFont(None, 50), WHITE, 10, 20)
+        draw_text(f"Highest Score: {highest_score}", pg.font.SysFont(None, 50), WHITE, 10, 20+50)
 
         pg.display.flip()
-    
-    pg.quit()
-
 
 def main_menu():
-    menu = True
-    while menu:
-        # Background
-        screen.blit(bg_image, (0, 0))
+    intro = True
 
-        # Judul Game
-        font = pg.font.SysFont(None, 70)
-        draw_text("Space Shooter", font, WHITE, SCREEN_WIDTH//4 + 150, SCREEN_HEIGHT//4 + 100)
-
-        # Tombol Start
-        draw_button("Start Game", SCREEN_WIDTH // 2 - 150, SCREEN_HEIGHT // 2, 300, 50, BLUE, RED, start_game)
-
-        # Tombol Quit
+    while intro:
         for event in pg.event.get():
             if event.type == pg.QUIT:
-                menu = False
+                pg.quit()
+                quit()
+            
+        draw_bg()
+        draw_text("Space Shooter", pg.font.SysFont(None, 100), WHITE, SCREEN_WIDTH // 4 + 50, SCREEN_HEIGHT // 4)
+        
+        draw_button("Start", SCREEN_WIDTH // 4 + 150, SCREEN_HEIGHT // 4 + 165, 300, 75, GREEN, RED, start_game)
+        draw_button("Quit", SCREEN_WIDTH // 4 + 150, SCREEN_HEIGHT // 4 + 165 + 150, 300, 75, GREEN, RED, pg.quit)
+
+        if pg.joystick.get_count() > 0:
+            if joystick.get_button(0):
+                start_game()
+            if joystick.get_button(1):
+                pg.quit()
+                quit()
 
         pg.display.update()
+        clock.tick(15)
+    pg.quit()
 
-# Jalankan Menu Utama
 if __name__ == "__main__":
-  main_menu()
+    main_menu()
