@@ -29,15 +29,18 @@ RED = (255, 0, 0)
 BLUE = (0, 0, 255)
 GREEN = (0, 255, 0)
 
-bg_image = pg.image.load("bg.png").convert_alpha()
+bg_image = pg.image.load(".\\assets\\images\\bg.png").convert_alpha()
 bg_image = pg.transform.scale(bg_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
 
-kill_sound = pg.mixer.Sound("kill.mp3")
+kill_sound = pg.mixer.Sound(".\\assets\\bank_sound\\kill.mp3")
 kill_sound.set_volume(2)
-hit_sound = pg.mixer.Sound("hit.mp3")
+hit_sound = pg.mixer.Sound(".\\assets\\bank_sound\\hit.mp3")
 hit_sound.set_volume(0.5)
-backsound = pg.mixer.Sound("backsound.mp3")
+backsound = pg.mixer.Sound(".\\assets\\bank_sound\\backsound.mp3")
+backsound.set_volume(0.5)
 backsound.play(-1)
+game_over_sound = pg.mixer.Sound(".\\assets\\bank_sound\\game_over.mp3")
+game_over_sound.set_volume(0.7)
 
 def draw_bg():
     screen.blit(bg_image, (0, 0))
@@ -46,7 +49,7 @@ def draw_bg():
 class Player(pg.sprite.Sprite):
   def __init__(self):
     super().__init__()
-    self.image = pg.image.load("player.png").convert_alpha()
+    self.image = pg.image.load(".\\assets\\images\\player.png").convert_alpha()
     self.image = pg.transform.scale(self.image, (75, 75))
     self.rect = self.image.get_rect()
     self.rect.center = (SCREEN_WIDTH//2, SCREEN_HEIGHT - 50)
@@ -84,8 +87,8 @@ class Player(pg.sprite.Sprite):
 class Bullet(pg.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
-        self.image = pg.Surface((10, 5))
-        self.image.fill(RED)
+        self.image = pg.image.load(".\\assets\\images\\bullet.png").convert_alpha()
+        self.image =pg.transform.scale(self.image, (50, 50))
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
         self.speed = -10  # Peluru bergerak ke atas
@@ -99,7 +102,7 @@ class Bullet(pg.sprite.Sprite):
 class Enemy(pg.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.image = pg.image.load("enemies.png").convert_alpha()
+        self.image = pg.image.load(".\\assets\\images\\enemies.png").convert_alpha()
         self.image = pg.transform.scale(self.image, (100, 100))
         self.rect = self.image.get_rect()
         self.rect.x = rand.randint(0, SCREEN_WIDTH - 75)
@@ -180,6 +183,7 @@ def start_game():
             
             # Menembakkan peluru dengan mouse atau joystick
             if event.type == pg.MOUSEBUTTONDOWN and event.button == 1:  # Mouse kiri
+                hit_sound.play()
                 bullet = Bullet(player.rect.centerx, player.rect.top)
                 all_sprites.add(bullet)
                 bullets.add(bullet)
@@ -229,6 +233,8 @@ def start_game():
                 if game_over_time > highest_score:
                     highest_score = game_over_time
 
+                game_over_sound.play()
+
             # Menghitung Skor
             score = (pg.time.get_ticks() - start) // 1000
 
@@ -236,7 +242,7 @@ def start_game():
 
         all_sprites.draw(screen)
 
-        # Gambar kesehatan musuh
+        # Gambar nyawa musuh
         for enemy in enemies:
             enemy.draw_health()
 
