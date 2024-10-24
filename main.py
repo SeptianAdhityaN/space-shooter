@@ -21,6 +21,7 @@ clock = pg.time.Clock()
 FPS = 60
 
 highest_score = 0
+boss_spawned = False
 
 # Warna
 WHITE = (255, 255, 255)
@@ -179,7 +180,7 @@ def draw_button(text, x, y, w, h, inactive_color, active_color, action=None):
     screen.blit(text_surf, (x + (w / 4), y + (h / 4)))
 
 def start_game():
-    global highest_score
+    global highest_score, boss_spawned
     all_sprites = pg.sprite.Group()
     enemies = pg.sprite.Group()
     bullets = pg.sprite.Group()
@@ -240,13 +241,28 @@ def start_game():
                 hit.kill()
                 score += 25
                 kill_sound.play()
-
-        # Boss muncul setiap skor 100
-        if score >= level * 100:
+        
+        # Logika naik level
+        if score >= level * 50:
             level += 1
+            # Musuh baru dengan kecepatan yang lebih cepat
+            for i in range(5):
+                enemy = Enemy()
+                # Musuh makin cepat tiap level
+                enemy.speed = rand.randint(1 + level, 5 + level) 
+                all_sprites.add(enemy)
+                enemies.add(enemy)
+
+        # Boss muncul setiap skor kelipatan 100
+        if score % 100 == 0 and score > 0 and not boss_spawned:
             boss = Boss()
             all_sprites.add(boss)
             bosses.add(boss)
+            boss_spawned = True  # Menandai bahwa bos telah muncul untuk skor ini
+
+        # Reset flag ketika skor tidak lagi kelipatan 100
+        if score % 100 != 0:
+            boss_spawned = False
 
         # Memperbarui Highest Score
         if score > highest_score:
